@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>signup</title>
+	<style type="text/css">
+		*{
+			padding:0;
+			margin: 0;
+			box-sizing: border-box;
+
+		}
+
+
+		body{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			min-height: 100vh;
+			 background-image: url(static/light.jpg); 
+			
+			background-repeat: no-repeat;
+			background-position: center left;
+			background-size: cover; 
+
+
+		}
+
+		section{
+			position: relative;;
+			max-width: 400px;
+			background-color: rgba(255,255,255,0.08);
+			box-shadow: 12px 12px 20px rgba(0,0,0,0.2);
+			border: 1px solid rgba(243 ,243,243,0.7);
+			border-radius: 20px;
+			backdrop-filter:blur(3px);
+			display: flex;
+			justify-content: center;;
+			align-items: center;
+			padding:2rem 3rem;
+
+		}
+
+		h1{
+			font-size: 2rem;
+			color: #e0f3ed;
+			text-align: center;}
+			
+		
+
+		.singup{display: none;}
+		.inputbox{
+			position: relative;
+			margin: 35px 0;
+			max-width: 310px;
+			border-bottom: 1px solid #e0f3ed;
+			
+			
+					}
+		.inputbox label{
+			position: absolute;
+			top: 50%;
+			left: 2px;
+			transform: translateY(-65%);
+			color: rgb(98 114 111);
+			font-size: 1rem;
+			pointer-events: none;
+			transition: all 0.5s ease-in-out;
+
+		
+
+		}
+		a{
+			color: rgb(98 114 111);
+			font-size: 25px;
+		}
+		p{
+			color: rgb(98 114 111);
+		}
+		.hover{
+			background-color: transparent;
+			border-color: transparent;
+			margin: 20px;
+			text-decoration: none;
+			border:2px solid transparent;
+			padding: 8px;
+			color: rgb(98 114 111);
+		}
+		.hover:hover{
+		box-shadow: 0 0 20px green;
+			padding: 8px;
+		padding-right: 4px;
+		border: 1px solid green;
+		border-radius: 12px;
+			}
+			.hover:active{
+         box-shadow: 0 0 20px green;
+         border-color: green;
+         background-color: green;
+			}
+			
+		
+		input:focus~label,
+		input:valid~label{	
+			padding-left: 4px;
+			top: -5px;
+
+		}
+
+		div input{
+			
+			
+			background-color:transparent;
+			border: none;
+outline: none;
+			
+			
+			color: white;
+			text-decoration-line: none
+		}
+		
+	</style>
+</head>
+<body><section>
+ <form class="signup"><h1>SIGN UP</h1>
+		<!-- <div class="inputbox"> -->
+			<!-- <input type="text" required > -->
+<!-- <label>NAME</label> -->
+		</div><div class="inputbox" >
+			<input type="text" required>
+<label>EMAIL</label>
+		</div>
+		<div class="inputbox">
+			<input type="password" required><label>Password</label>
+
+		</div>
+		<div class="forgot"><label>
+			<input type="checkbox" required ><LABEL style="color:rgb(98 114 111);">I agree to</LABEL> <br> <a >privacy policy</a>
+		</label>
+		</div>
+		<button class="hover">sign up</button>
+		<div class="para ">
+			<p>you have an account<br><a href="login.html">LOGIN</a></p>
+		</div>
+	</form>
+</section>
+</body>
+</html>
