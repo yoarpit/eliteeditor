@@ -1,1 +1,1 @@
-# Hello this is a image editor for browser
+# Hello this is a image editor for browsers

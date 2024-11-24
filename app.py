@@ -1,7 +1,7 @@
 from flask import Flask,render_template,request,redirect
 from flask_sqlalchemy import *
 from datetime import datetime
-#from flask_mail import mail
+
  
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ansh@localhost/elite'
@@ -21,9 +21,6 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/signin")
-def sign():
-    return render_template("signin.html")
 
 
 @app.route("/login",methods=['GET','POST'])
@@ -42,13 +39,20 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/signup")
+@app.route("/signup",methods=['GET','POST'])
 def up():
-    return render_template("signup.html")
+     
 
-@app.route("/drop")
-def drop():
-    return render_template("dropdown.html")
+
+
+ return render_template("signup.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 
  
 if __name__ == "__main__":
