@@ -1,7 +1,7 @@
 {% extends "index.html" %} 
         {% block signup %} 
         <div class="position-absolute top-50 start-50 translate-middle border mb-3  p-4 rounded-3">
-                <form  class="bg-dark " onsubmit="return validateform()" name="signup" action="/signup" method="" >
+                <form  class="bg-dark " onsubmit="return validateform()" name="signup" action="/signup"  method="post">
                         <!-- <div class="position-absolute top-50 start-50 translate-middle"> -->
                         <div class=" col-auto mb-3">
                           <label for="exampleInputEmail1" class="form-label">Email address</label>
@@ -17,7 +17,7 @@
                           <label class="form-check-label" for="exampleCheck1">Check me out</label>
                         </div>
                         <div><img src="..." class="rounded-circle" alt="..."></div>
-                        <button type="submit" class="btn btn-primary">Signup</button></div>
+                      <a href="signup">  <button type="submit" class="btn btn-primary">Signup</button></a></div>
                       </form> 
 
                       
