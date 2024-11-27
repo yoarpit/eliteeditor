@@ -1,0 +1,20 @@
+{% extends "index.html" %} 
+        {% block editor %} 
+
+        
+       <div class="" style="float:right; " >
+      <img  class="" src="url_for()" width="1000" height="500" alt="">
+       </div>
+<form action="/editor" method="post">
+       <div class="custom-file position-absolute bottom-0 start-0">
+         <label for="me">Choose a image:</label><br>
+        <input style="text-decoration: none; " type="file" name="file" class="my-2"  id="me"><br>
+        <button type="submit" class="btn btn-outline-success">Submit</button>
+
+      </div>
+
+</form>
+
+
+
+        {% endblock %} 

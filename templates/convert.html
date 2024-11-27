@@ -1,0 +1,48 @@
+{% extends "index.html" %} 
+        {% block convert %} 
+
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+ 
+    {% for category, message in messages %} 
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> {{ message | safe}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+
+{% endif %}
+{% endwith %}
+
+
+<div class="container my-4">
+
+    <h1 class="fs-2 text">Elite Editor - convert your image online</h1>
+
+    <form action="/convert" method="post" enctype="multipart/form-data">
+
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Select an Image to edit</label>
+            <input class="form-control" type="file" name="file" id="formFile">
+        </div>
+        <div class="mb-3">
+            <div class="form-floating">
+                <select name="operation" class="form-select" id="floatingSelect"
+                    aria-label="Floating label select example">
+                    <option selected>Choose an Operation</option>
+                    <option value="cpng">Convert to PNG</option>
+                    <option value="cgray">Convert to Grayscale</option>
+                    <option value="cwebp">Convert to Webp</option>
+                    <option value="cjpg">Convert to Jpg</option>
+                </select>
+                <label for="floatingSelect">Select an Editing Operation</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Submit</button>
+
+    </form>
+</div>
+
+{% endblock %} 

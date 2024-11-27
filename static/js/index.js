@@ -30,7 +30,7 @@ function validateForm() {
    
 
    if (u == "") {
-        alert("Email must be filled out");
+     let a= document.getElementById("my").innerHTML='<div class="alert alert-success" role="alert">A simple success alert—check it out!</div>';
         
       }
    else if (v == "") {
