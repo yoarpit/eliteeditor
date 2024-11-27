@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,session,flash
+from flask import Flask,render_template,request,redirect,session,flash,url_for
 from flask_sqlalchemy import *
 from werkzeug.utils import secure_filename
 
@@ -129,7 +129,7 @@ def about():
 def editor():
 
  if request.method == "POST": 
-        operation = request.form.get("operation")
+        # operation = request.form.get("operation")
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -143,7 +143,7 @@ def editor():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            new = processImage(filename, operation)
+            # new = processImage(filename, operation)
 
  return render_template("editor.html")
 
