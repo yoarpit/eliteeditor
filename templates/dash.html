@@ -1,0 +1,28 @@
+{% extends "index.html" %} 
+        {% block reco %}
+
+        
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">SNO</th>
+                <th scope="col">Email</th>
+                <!-- h scope="col"></th> -->
+                <th scope="col">Edit List </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">1</th>
+                <td>{{user.email}}</td>
+                <!-- <td>Otto</td> -->
+                <td>
+                    <a class="btn btn-sm btn-primary" href="#"><i class="far fa-edit"></i> edit</a>
+                    <a class="btn btn-sm btn-danger" href="#"><i class="fas fa-trash-alt"></i> delete</a>    
+                </td>
+              </tr>
+             
+            </tbody>
+          </table>
+        
+        {% endblock %} 
