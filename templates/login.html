@@ -1,56 +1,51 @@
-{% extends "index.html" %} 
-        {% block conten %} 
-      
-        <div class="position-absolute top-50 start-50 translate-middle border mb-3  p-4 rounded-3">
-        <form  class="bg-dark " onsubmit="return validateForm()" name="login" action="/login" method="post">
-                <!-- <div class="position-absolute top-50 start-50 translate-middle"> -->
-                <div class=" col-auto mb-3">
-                  <label for="exampleInputEmail1" class="form-label">Email address</label>
-                  <input type="email" name="email" class="form-control"  id="exampleInputEmail1" aria-describedby="emailHelp">
-                  <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-                </div>
-                <div class="mb-3">
-                  <label for="exampleInputPassword1" class="form-label">Password</label>
-                  <input type="password" name="password" class="form-control" id="exampleInputPassword1">
-                </div>
-                <div class="mb-3 form-check">
-                  <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                  <label class="form-check-label" for="exampleCheck1">Check me out</label>
-                </div>
+{% extends "index.html" %}
+{% block conten %}
 
-                <p style="text-align: center;">OR</p>
-                  <hr>
-                    
-                <div class="d-flex">
-                  
-                  <a href="google/" class="nav-link"> 
-                  <img id="google"
-                     src="static/goog.png"
-                     alt="Googl"> 
-                  </a>
-                  <!-- <a href="twitter/"> -->
-                  <!-- <img id="twitter"
+<div class="position-absolute top-50 start-50 translate-middle border mb-3  p-4 rounded-3">
+  <form class="bg-dark " onsubmit="return validateForm()" name="login" action="/login" method="post">
+    <!-- <div class="position-absolute top-50 start-50 translate-middle"> -->
+    <div class=" col-auto mb-3">
+      <label for="exampleInputEmail1" class="form-label">Email address</label>
+      <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+      <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Password</label>
+      <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+    </div>
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="exampleCheck1">
+      <label class="form-check-label" for="exampleCheck1">Check me out</label>
+    </div>
+
+    <p style="text-align: center;">OR</p>
+    <hr>
+
+    <div class="d-flex">
+
+      <a href="google/" class="nav-link">
+        <img id="google" src="static/goog.png" alt="Googl">
+      </a>
+      <!-- <a href="twitter/"> -->
+      <!-- <img id="twitter"
                      src="https://img.shields.io/badge/Twitter-Connect-brightgreen?style=for-the-badge&labelColor=black&logo=twitter"
                      alt="Twitter"> <br>
                   </a> -->
-                  <a href="facebook/" class="nav-link mx-5">
-                  <img id="facebook"
-                     src="static/facebook.png"
-                     alt="Facebook">   </a>
-                    
-
-                     <a href="instagram/" class="nav-link">
-                      <img id="linkedin"
-                         src="static/instagram.png"
-                         alt="linkdin">   </a>
-                           
-                    
-                    
-                    </div>
+      <a href="facebook/" class="nav-link mx-5">
+        <img id="facebook" src="static/facebook.png" alt="Facebook"> </a>
 
 
-                  
-                <button type="submit "  class="btn btn-primary mt-4  ">Login</button></div>
-              </form>
+      <a href="instagram/" class="nav-link">
+        <img id="linkedin" src="static/instagram.png" alt="linkdin"> </a>
 
-{% endblock %} 
+
+
+    </div>
+
+
+
+    <button type="submit " class="btn btn-primary mt-4  ">Login</button>
+</div>
+</form>
+
+{% endblock %}

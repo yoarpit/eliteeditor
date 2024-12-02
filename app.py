@@ -1,9 +1,12 @@
-from flask import Flask,render_template,request,redirect,session,flash,url_for,Response
+from flask import Flask,render_template,request,redirect,session,flash,url_for,Response,jsonify,send_file
 from flask_sqlalchemy import *
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from deepface import DeepFace
 import cv2,os
 from authlib.integrations.flask_client import *
+
+
 
 
  
@@ -19,11 +22,30 @@ app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ansh@localhost/elite'
 db = SQLAlchemy(app)
 
 
+
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'webp', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+# Directories to store images
+# UPLOAD_FOLDER = 'static/uploads'
+EDITED_FOLDER = 'static/edited'
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(EDITED_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['EDITED_FOLDER'] = EDITED_FOLDER
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 oauth = OAuth(app)
@@ -58,19 +80,19 @@ def processImage(filename, operation):
     match operation:
         case "cgray":
             imgProcessed = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            newFilename = f"static/{filename}"
+            newFilename = f"static/edited/{filename}"
             cv2.imwrite(newFilename, imgProcessed)
             return newFilename
         case "cwebp": 
-            newFilename = f"static/{filename.split('.')[0]}.webp"
+            newFilename = f"static/edited/{filename.split('.')[0]}.webp"
             cv2.imwrite(newFilename, img)
             return newFilename
         case "cjpg": 
-            newFilename = f"static/{filename.split('.')[0]}.jpg"
+            newFilename = f"static/edited/{filename.split('.')[0]}.jpg"
             cv2.imwrite(newFilename, img)
             return newFilename
         case "cpng": 
-            newFilename = f"static/{filename.split('.')[0]}.png"
+            newFilename = f"static/edited/{filename.split('.')[0]}.png"
             cv2.imwrite(newFilename, img)
             return newFilename
 
@@ -102,11 +124,12 @@ def login():
 
 @app.route("/dashboard")
 def dash():
-      if session['email']:
-        user=User.query.filter_by(email=session['email']).first()
-       
-       
-      return render_template('login.html')
+    #   if 'email' not in session:
+        # flash('Please log in to access the dashboard.', 'warning')
+        # return redirect(url_for('login'))
+      user = User.query.get(session['email'])
+      return render_template('dashboard.html', user=user)
+
 
          
    
@@ -309,60 +332,132 @@ def instagram_auth():
     print(" instagram User", profile)
     return redirect('/')
  
+camera = cv2.VideoCapture(0)  # Use 0 for the default webcam
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 
+def analyze_and_render(frame):
+    """Analyze a frame and overlay analysis results with rectangles."""
+    try:
+        # Detect and analyze faces
+        analysis_results = DeepFace.analyze(frame, actions=['emotion', 'age', 'gender'], enforce_detection=False)
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-def generate_frames():
-    # Open webcam
-    camera = cv2.VideoCapture(0)
-    
-    while True:
-        # Read the frame from the webcam
-        success, frame = camera.read()
-        if not success:
-              break
-        
-        # else:
-        #     try:
-        #         # Analyze the frame using DeepFace for emotion detection
-        #         analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-        #         emotion = analysis['dominant_emotion']
-                
-        #         # Add emotion text to the frame
-        #         cv2.putText(frame, f"Emotion: {emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        #     except Exception as e:
-        #         # Handle detection failure
-        #         cv2.putText(frame, "Face Not Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            
-        # Convert frame to grayscale for face detection
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
-        # Detect faces
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-        
-        # Draw rectangles around detected faces
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        
-         
-        # Encode the frame to JPEG format
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        
-        # Yield the frame in byte format for streaming
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        for result in analysis_results:
+            # Extract face region and results
+            x, y, w, h = result['region']['x'], result['region']['y'], result['region']['w'], result['region']['h']
+            emotion = result['dominant_emotion']
+            age = int(result['age'])
+            # gender = result['gender']
 
-    # Release the camera resource
-    camera.release()
+            # Draw rectangle around the face
+            start_point = (x, y)
+            end_point = (x + w, y + h)
+            cv2.rectangle(frame, start_point, end_point, (0, 255, 0), 2)
+
+            # Add text overlay
+            text = f"{age}yrs, {emotion}"
+            cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+
+    except Exception as e:
+        # Handle cases where no face is detected
+        cv2.putText(frame, "No Face Detected", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+    return frame
+
 
 @app.route('/video_feed')
 def video_feed():
-    # Return the video stream from the generate_frames function
+    """Stream the video feed with real-time analysis."""
+    def generate_frames():
+        while True:
+            success, frame = camera.read()
+            if not success:
+                break
+
+            # Analyze and render the frame
+            frame = analyze_and_render(frame)
+
+            # Encode frame as JPEG
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    """Handle image upload."""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            uploaded_filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(uploaded_filepath)
+
+            # Return the uploaded image URL
+            return jsonify({'image_url': url_for('static', filename=f'uploads/{filename}')})
+        else:
+            return jsonify({'error': 'Invalid file type'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Upload error: {str(e)}'}), 500
+
+@app.route('/edit', methods=['POST'])
+def edit_image():
+    """Handle image editing."""
+    try:
+        data = request.json
+        filename = data.get('filename')
+        operation = data.get('operation')
+        params = data.get('params', {})
+
+        if not filename or not operation:
+            return jsonify({'error': 'Filename or operation missing in request'}), 400
+
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if not os.path.exists(filepath):
+            return jsonify({'error': 'Uploaded file not found'}), 404
+
+        # Load the image
+        image = cv2.imread(filepath)
+        if image is None:
+            return jsonify({'error': 'Failed to load the image'}), 500
+
+        # Apply the selected operation
+        if operation == 'resize':
+            width = int(params.get('width', image.shape[1]))
+            height = int(params.get('height', image.shape[0]))
+            image = cv2.resize(image, (width, height))
+
+        elif operation == 'rotate':
+            angle = int(params.get('angle', 0))
+            (h, w) = image.shape[:2]
+            center = (w // 2, h // 2)
+            rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+            image = cv2.warpAffine(image, rotation_matrix, (w, h))
+
+        elif operation == 'flip':
+            flip_code = int(params.get('flip_code', 1))
+            image = cv2.flip(image, flip_code)
+
+        else:
+            return jsonify({'error': 'Unknown operation'}), 400
+
+        # Save the edited image
+        edited_filename = f"edited_{filename}"
+        edited_filepath = os.path.join(app.config['EDITED_FOLDER'], edited_filename)
+        cv2.imwrite(edited_filepath, image)
+
+        return jsonify({'edited_image_url': url_for('static', filename=f'edited/{edited_filename}')})
+    except Exception as e:
+        return jsonify({'error': f'Edit error: {str(e)}'}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)  

@@ -1,30 +1,118 @@
-{% extends "index.html" %} 
-        {% block editor %}
-        
-   
-<div>
-
-  
-
-</div>        
-
-
-<div class="" style="float:right; " >
-      <img  class="" src="{{file}}" width="1000" height="500" >
- </div>
+{% extends "index.html" %}
+{% block editor %}
 
 
 
-<form action="/editor" method="post">
-       <div class="custom-file position-absolute bottom-0 start-0">
-         <label for="me">Choose a image:</label><br>
-        <input style="text-decoration: none; " type="file" name="file" class="my-2"  id="me"><br>
-        <button type="submit" class="btn btn-outline-success">Submit</button>
+<h1>Upload and Edit Image</h1>
 
-      </div>
-
+<!-- Upload Section -->
+<form id="uploadForm">
+    <label for="file">Upload Image:</label>
+    <input type="file" id="file" name="file" accept="image/*" required>
+    <button type="submit">Upload</button>
 </form>
+<div id="upload-error" style="color: red;"></div>
+
+<div id="uploaded-section" style="display: none;">
+    <h2>Uploaded Image</h2>
+    <img id="uploaded-image" src="" alt="Uploaded Image" style="max-width: 400px;">
+    <br><br>
+
+    <!-- Editing Options -->
+    <h3>Edit Options</h3>
+    <form id="editForm">
+        <input type="hidden" id="filename" name="filename">
+
+        <h4>Resize</h4>
+        <label>Width:</label>
+        <input type="number" id="resize-width" name="width" placeholder="Width">
+        <label>Height:</label>
+        <input type="number" id="resize-height" name="height" placeholder="Height">
+        <button type="button" id="resize-btn">Apply Resize</button>
+
+        <h4>Rotate</h4>
+        <label>Angle:</label>
+        <input type="number" id="rotate-angle" name="angle" placeholder="Angle">
+        <button type="button" id="rotate-btn">Apply Rotate</button>
+
+        <h4>Flip</h4>
+        <label>Flip Code:</label>
+        <input type="number" id="flip-code" name="flip_code" placeholder="0=Vertical, 1=Horizontal">
+        <button type="button" id="flip-btn">Apply Flip</button>
+    </form>
+
+    <div id="edit-error" style="color: red;"></div>
+    <div id="edited-section" style="display: none;">
+        <h2>Edited Image</h2>
+        <img id="edited-image" src="" alt="Edited Image" style="max-width: 400px;">
+    </div>
+</div>
+
+<script>
+    // Handle image upload
+    $('#uploadForm').on('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                $('#uploaded-image').attr('src', response.image_url);
+                $('#filename').val(response.image_url.split('/').pop());
+                $('#uploaded-section').show();
+                $('#upload-error').text('');
+            },
+            error: function (err) {
+                $('#upload-error').text(err.responseJSON.error || 'Upload failed!');
+            }
+        });
+    });
+
+    // Handle image editing
+    function editImage(operation, params) {
+        const filename = $('#filename').val();
+        $.ajax({
+            url: '/edit',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ filename, operation, params }),
+            success: function (response) {
+                $('#edited-image').attr('src', response.edited_image_url);
+                $('#edited-section').show();
+                $('#edit-error').text('');
+            },
+            error: function (err) {
+                $('#edit-error').text(err.responseJSON.error || 'Edit failed!');
+            }
+        });
+    }
+
+    // Resize button
+    $('#resize-btn').on('click', function () {
+        const width = $('#resize-width').val();
+        const height = $('#resize-height').val();
+        editImage('resize', { width, height });
+    });
+
+    // Rotate button
+    $('#rotate-btn').on('click', function () {
+        const angle = $('#rotate-angle').val();
+        editImage('rotate', { angle });
+    });
+
+    // Flip button
+    $('#flip-btn').on('click', function () {
+        const flip_code = $('#flip-code').val();
+        editImage('flip', { flip_code });
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 
-        {% endblock %} 
+{% endblock %}

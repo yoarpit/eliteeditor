@@ -1,17 +1,17 @@
-{% extends "index.html" %} 
-        {% block convert %} 
+{% extends "index.html" %}
+{% block convert %}
 
 
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
- 
-    {% for category, message in messages %} 
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Success!</strong> {{ message | safe}}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
+
+{% for category, message in messages %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> {{ message | safe}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
 
 {% endif %}
 {% endwith %}
@@ -45,4 +45,4 @@
     </form>
 </div>
 
-{% endblock %} 
+{% endblock %}
