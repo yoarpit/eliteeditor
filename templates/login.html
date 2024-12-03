@@ -2,11 +2,11 @@
 {% block conten %}
 
 <div class="position-absolute top-50 start-50 translate-middle border mb-3  p-4 rounded-3">
-  <form class="bg-dark " onsubmit="return validateForm()" name="login" action="/login" method="post">
+  <form class=" " onsubmit="return validateForm()" name="login" action="/login" method="post">
     <!-- <div class="position-absolute top-50 start-50 translate-middle"> -->
     <div class=" col-auto mb-3">
       <label for="exampleInputEmail1" class="form-label">Email address</label>
-      <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+      <input type="email" name="email" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
       <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
     </div>
     <div class="mb-3">
@@ -24,7 +24,7 @@
     <div class="d-flex">
 
       <a href="google/" class="nav-link">
-        <img id="google" src="static/goog.png" alt="Googl">
+        <img id="google" style="width: 45px;" src="static/goog.png" alt="Googl">
       </a>
       <!-- <a href="twitter/"> -->
       <!-- <img id="twitter"
@@ -32,11 +32,11 @@
                      alt="Twitter"> <br>
                   </a> -->
       <a href="facebook/" class="nav-link mx-5">
-        <img id="facebook" src="static/facebook.png" alt="Facebook"> </a>
+        <img id="facebook" width="50px" src="static/facebook.png" alt="Facebook"> </a>
 
 
       <a href="instagram/" class="nav-link">
-        <img id="linkedin" src="static/instagram.png" alt="linkdin"> </a>
+        <img id="linkedin" width="50px" src="static/instagram.png" alt="linkdin"> </a>
 
 
 

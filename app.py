@@ -5,11 +5,11 @@ from datetime import datetime
 from deepface import DeepFace
 import cv2,os
 from authlib.integrations.flask_client import *
+import tensorflow as tf 
 
 
 
 
- 
 
 app = Flask(__name__)
 
@@ -20,6 +20,7 @@ app.config['SERVER_NAME'] = 'localhost:5000'
 
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ansh@localhost/elite'
 db = SQLAlchemy(app)
+
 
 
 
