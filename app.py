@@ -46,7 +46,6 @@ os.makedirs(EDITED_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['EDITED_FOLDER'] = EDITED_FOLDER
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 oauth = OAuth(app)
@@ -342,7 +341,7 @@ def analyze_and_render(frame):
     """Analyze a frame and overlay analysis results with rectangles."""
     try:
         # Detect and analyze faces
-        analysis_results = DeepFace.analyze(frame, actions=['emotion', 'age', 'gender'], enforce_detection=False)
+        analysis_results = DeepFace.analyze(frame, actions=['emotion', 'age'], enforce_detection=False)
 
         for result in analysis_results:
             # Extract face region and results
