@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,session,flash,url_for,Response,jsonify,send_file
+from flask import Flask,render_template,request,redirect,session,flash,url_for,Response,jsonify,send_file, send_from_directory
 from flask_sqlalchemy import *
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -6,6 +6,8 @@ from deepface import DeepFace
 import cv2,os
 from authlib.integrations.flask_client import *
 import tensorflow as tf 
+from PIL import Image
+import io
 
 
 
@@ -366,98 +368,85 @@ def analyze_and_render(frame):
     return frame
 
 
-@app.route('/video_feed')
-def video_feed():
-    """Stream the video feed with real-time analysis."""
-    def generate_frames():
-        while True:
-            success, frame = camera.read()
-            if not success:
-                break
 
-            # Analyze and render the frame
-            frame = analyze_and_render(frame)
+@app.route("/", methods=["GET", "POST"])
+def index():
+    processed_image = None
+    filename = None
+    original_filepath = None
 
-            # Encode frame as JPEG
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-
-@app.route('/upload', methods=['POST'])
-def upload_image():
-    """Handle image upload."""
-    try:
+    if request.method == "POST":
         if 'file' not in request.files:
-            return jsonify({'error': 'No file part in the request'}), 400
-
+            return redirect(request.url)
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            uploaded_filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(uploaded_filepath)
+            original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(original_filepath)
 
-            # Return the uploaded image URL
-            return jsonify({'image_url': url_for('static', filename=f'uploads/{filename}')})
-        else:
-            return jsonify({'error': 'Invalid file type'}), 400
-    except Exception as e:
-        return jsonify({'error': f'Upload error: {str(e)}'}), 500
+            # Get user inputs for image processing
+            width = request.form.get("width", type=int)
+            height = request.form.get("height", type=int)
+            angle = request.form.get("angle", type=int)
+            flip = request.form.get("flip", type=str)
+            blur = request.form.get("blur", type=int)
+            contrast = request.form.get("contrast", type=float, default=1.0)
+            filter_option = request.form.get("filter", type=str)  # Grayscale or Sepia
 
-@app.route('/edit', methods=['POST'])
-def edit_image():
-    """Handle image editing."""
-    try:
-        data = request.json
-        filename = data.get('filename')
-        operation = data.get('operation')
-        params = data.get('params', {})
+            # Read the uploaded image
+            img = cv2.imread(original_filepath)
 
-        if not filename or not operation:
-            return jsonify({'error': 'Filename or operation missing in request'}), 400
+            # Resize the image if dimensions are provided
+            if width and height:
+                img = cv2.resize(img, (width, height))
 
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if not os.path.exists(filepath):
-            return jsonify({'error': 'Uploaded file not found'}), 404
+            # Rotate the image if an angle is provided
+            if angle:
+                (h, w) = img.shape[:2]
+                center = (w // 2, h // 2)
+                matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+                img = cv2.warpAffine(img, matrix, (w, h))
 
-        # Load the image
-        image = cv2.imread(filepath)
-        if image is None:
-            return jsonify({'error': 'Failed to load the image'}), 500
+            # Apply blur if specified
+            if blur:
+                img = cv2.GaussianBlur(img, (blur, blur), 0)
 
-        # Apply the selected operation
-        if operation == 'resize':
-            width = int(params.get('width', image.shape[1]))
-            height = int(params.get('height', image.shape[0]))
-            image = cv2.resize(image, (width, height))
+            # Apply flip if specified
+            if flip == 'horizontal':
+                img = cv2.flip(img, 1)
+            elif flip == 'vertical':
+                img = cv2.flip(img, 0)
 
-        elif operation == 'rotate':
-            angle = int(params.get('angle', 0))
-            (h, w) = image.shape[:2]
-            center = (w // 2, h // 2)
-            rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
-            image = cv2.warpAffine(image, rotation_matrix, (w, h))
+            # Adjust contrast if specified
+            if contrast != 1.0:
+                img = cv2.convertScaleAbs(img, alpha=contrast, beta=0)
 
-        elif operation == 'flip':
-            flip_code = int(params.get('flip_code', 1))
-            image = cv2.flip(image, flip_code)
+            # Apply filters (Grayscale, Sepia)
+            if filter_option == 'grayscale':
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            elif filter_option == 'sepia':
+                img = cv2.applyColorMap(img, cv2.COLORMAP_PINK)
 
-        else:
-            return jsonify({'error': 'Unknown operation'}), 400
+            # Save the processed image
+            processed_filename = f"processed_{filename}"
+            processed_filepath = os.path.join(app.config['EDITED_FOLDER'], processed_filename)
+            cv2.imwrite(processed_filepath, img)
 
-        # Save the edited image
-        edited_filename = f"edited_{filename}"
-        edited_filepath = os.path.join(app.config['EDITED_FOLDER'], edited_filename)
-        cv2.imwrite(edited_filepath, image)
+            # Convert processed image to send to the browser
+            processed_image = Image.open(processed_filepath)
+            processed_image = processed_image.convert("RGB")
+            img_byte_arr = io.BytesIO()
+            processed_image.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
 
-        return jsonify({'edited_image_url': url_for('static', filename=f'edited/{edited_filename}')})
-    except Exception as e:
-        return jsonify({'error': f'Edit error: {str(e)}'}), 500
+            return render_template("index.html", processed_image=img_byte_arr, filename=processed_filename, original_filepath=original_filepath)
+
+    return render_template("index.html", processed_image=processed_image, filename=filename, original_filepath=original_filepath)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 if __name__ == "__main__":
-    app.run(debug=True)  
+    app.run(debug=True)
