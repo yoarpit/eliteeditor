@@ -367,6 +367,26 @@ def analyze_and_render(frame):
 
     return frame
 
+@app.route('/video_feed')
+def video_feed():
+    """Stream the video feed with real-time analysis."""
+    def generate_frames():
+        while True:
+            success, frame = camera.read()
+            if not success:
+                break
+
+            # Analyze and render the frame
+            frame = analyze_and_render(frame)
+
+            # Encode frame as JPEG
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route("/", methods=["GET", "POST"])
